@@ -5,8 +5,8 @@ const FILES_TO_CACHE = [
     '/icons/icon-512x512.png',
     '/index.js',
     '/styles.css',
-    '../routes/api.js',
-    '/db.js'
+    '/db.js',
+    '/manifest.webmanifest',
 ];
 
 console.log(FILES_TO_CACHE)
@@ -25,7 +25,7 @@ self.addEventListener('install', function (evt) {
     evt.waitUntil(
         caches.open(CACHE_NAME).then(function(cache) {
             console.log('In the CACHE!!')
-            cache.addAll( FILES_TO_CACHE)
+            return cache.addAll( FILES_TO_CACHE)
         })
     );
     
@@ -54,7 +54,7 @@ self.addEventListener('install', function (evt) {
 // Enable the service worker to intercept network requests
 self.addEventListener('fetch', function(evt) {
     if (evt.request.url.includes('/api/')) {
-        console.log('[Service Worker] Fetch (data)', evt. request.url);
+        // console.log('[Service Worker] Fetch (data)', evt. request.url);
 
         evt.respondWith(
             caches.open(DATA_CACHE_NAME).then(cache => {
@@ -69,14 +69,17 @@ self.addEventListener('fetch', function(evt) {
                 .catch(err => {
                     return cache.match(evt.request);
                 });
+            }).catch(err => {
+                console.log(err)
             })
         )
+        return;
     }
     evt.respondWith(
         fetch(evt.request)
             .catch( function() {
                 return caches.match(evt.request)
-            }).then(response = () => {
+            }).then(response => {
                 if(response){
                     return response;
                 } else if (evt.request.headers.get('accept').includes('text/html')) {

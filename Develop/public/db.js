@@ -1,3 +1,4 @@
+console.log('IN DB!!!')
 
 let database;
 
@@ -21,11 +22,13 @@ request.onerror = (event) => {
     console.log('this is error', event.target.errorCode);
 }
 
-addToDatabase = () => {
+function addToDatabase() {
+    console.log('IN ADDTODATABASE!!!')
     const transaction = database.transaction(['pending'], 'readwrite');
     const store = transaction.objectStore('pending')
     const getAllTransaction = store.getAll();
     getAllTransaction.onsuccess = () => {
+        console.log(getAllTransaction.result)
         if (getAllTransaction.result.length > 0) {
             fetch("/api/transaction/bulk", {
                 method: 'POST',
@@ -36,7 +39,7 @@ addToDatabase = () => {
                 }
             }).then(response => {
                 return response.json();
-            }).then(data => {
+            }).then(() => {
                 const transaction = database.transaction(['pending'], 'readwrite');
                 const store = transaction.objectStore('pending')
                 store.clear();
